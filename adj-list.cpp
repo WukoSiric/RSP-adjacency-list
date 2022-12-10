@@ -2,6 +2,7 @@
 #include <list> 
 #include <vector>
 #include <queue>
+#include <stack>
 #include <utility>
 #include "vector_utils.cpp"
 
@@ -72,8 +73,32 @@ public:
             vertex_states[current] = PROCESSED;
             // Do after processing here
         }
-
         return std::pair(process_order, vertex_parents); 
+    }
+    void DFS(Graph * graph, int start) {
+        std::vector<STATE> vertex_states(graph->get_num_vertices(), UNDISCOVERED);
+
+        //Creating a stack
+        std::stack<int> s;
+
+        // Mark first as visited, add to stack 
+        vertex_states[start] = DISCOVERED; 
+        s.push(start); 
+
+        std::vector<std::list<int>> * adj_list = graph->get_adj_list(); 
+        while(!s.empty()) {
+            int current = s.top(); 
+            s.pop(); 
+            std::cout << current << " ";
+            // Exploring adjacent nodes
+            for (auto x : (*adj_list)[current]) {
+                if (vertex_states[x] == UNDISCOVERED) {
+                    vertex_states[x] = DISCOVERED; 
+                    s.push(x); 
+                }
+            }
+            vertex_states[current] = PROCESSED;
+        }
     }
 
     void find_path(int start, int end, std::vector<int> parents) {
@@ -94,12 +119,16 @@ int main() {
     std::cout << "Creates an undirected graph, has BFS so far..." << std::endl;
 
     // Creating the graph
-    Graph g(5);
+    Graph g(10);
     g.add_edge(0, 1);
     g.add_edge(0, 4);
-    g.add_edge(1, 2);
-    g.add_edge(1, 3);
-    g.add_edge(1, 4);
+    g.add_edge(4, 5);
+    g.add_edge(5, 6);
+    g.add_edge(6, 7);
+    g.add_edge(6, 3);
+    g.add_edge(7, 8);
+    g.add_edge(8, 9);
+    g.add_edge(9, 2);
 
     // Doing BFS, storing results
     GraphSearch gs;
@@ -112,7 +141,11 @@ int main() {
     print_vector(order);
     std::cout << "BFS Parents: ";
     print_vector(parents);
-    gs.find_path(0, 1, parents);
+    // gs.find_path(0, 2, parents);
+
+    std::cout << "DFS: "; 
+    gs.DFS(&g, 0);
+    std::cout << std::endl;
 
     return 0;
 }
