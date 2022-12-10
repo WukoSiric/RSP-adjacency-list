@@ -31,6 +31,16 @@ public:
 
 class GraphSearch {
 public:
+    void print_graph(std::vector<std::list<int>> * adj_list) {
+        for (int i = 0; i < adj_list->size(); i++) {
+            std::cout << "VERTEX " << i << ":";
+            for (auto x : (*adj_list)[i]) {
+                std::cout << " -> " << x;
+            }
+            std::cout << std::endl;
+        }
+    }
+
     std::pair<std::vector<int>, std::vector<int>> BFS(Graph * graph, int start) {
         // Array of enums 
         std::vector<int> process_order;
@@ -65,18 +75,19 @@ public:
 
         return std::pair(process_order, vertex_parents); 
     }
+
+    void find_path(int start, int end, std::vector<int> parents) {
+        if ((start == end) || (end == -1)) {
+            std::cout << start;
+        } else {
+            find_path(start, parents[end], parents);
+            std::cout << " " << end;
+        }
+    }
 };
 
 // Print Adj List Function
-void print_graph(std::vector<std::list<int>> * adj_list) {
-    for (int i = 0; i < adj_list->size(); i++) {
-        std::cout << "VERTEX " << i << ":";
-        for (auto x : (*adj_list)[i]) {
-            std::cout << " -> " << x;
-        }
-        std::cout << std::endl;
-    }
-}
+
 
 int main() {
     std::cout << "Welcome to my graph program!" << std::endl;
@@ -101,6 +112,7 @@ int main() {
     print_vector(order);
     std::cout << "BFS Parents: ";
     print_vector(parents);
+    gs.find_path(0, 1, parents);
 
     return 0;
 }
