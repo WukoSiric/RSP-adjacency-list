@@ -1,11 +1,19 @@
 #include <iostream> 
 #include <list> 
 #include <vector>
-// Undirected graph using adjacency list
+#include <queue>
+#include <utility>
+#include "vector_utils.cpp"
+
+enum STATE {UNDISCOVERED, DISCOVERED, PROCESSED};
 class Graph {
     int num_vertices;
     std::vector<std::list<int>> adj_list;
 public: 
+    int get_num_vertices() {
+        return this->num_vertices;
+    }
+
     std::vector<std::list<int>> * get_adj_list() {
         return &(this->adj_list);
     }
@@ -18,6 +26,44 @@ public:
     void add_edge(int src, int dest) {
         this->adj_list[src].push_back(dest);
         this->adj_list[dest].push_back(src);
+    }
+};
+
+class GraphSearch {
+public:
+    std::pair<std::vector<int>, std::vector<int>> BFS(Graph * graph, int start) {
+        // Array of enums 
+        std::vector<int> process_order;
+        std::vector<STATE> vertex_states(graph->get_num_vertices(), UNDISCOVERED);
+        std::vector<int> vertex_parents(graph->get_num_vertices(), -1); //Parent list for each node, size-1 because start node has no parent 
+
+        // Creating a queue
+        std::queue<int> q;
+
+        // Marking first as visited, adding to queue 
+        vertex_states[start] = DISCOVERED;
+        vertex_parents[start] = -1;
+        q.push(start);
+
+        std::vector<std::list<int>> * adj_list = graph->get_adj_list();
+        while(!q.empty()) {
+            int current = q.front();
+            q.pop(); 
+            // Processing node
+            process_order.push_back(current);
+            for (auto x : (*adj_list)[current]) {
+                // Could process edge here
+                if (vertex_states[x] == UNDISCOVERED) {
+                    vertex_states[x] = DISCOVERED;
+                    vertex_parents[x] = current; 
+                    q.push(x);
+                }
+            }
+            vertex_states[current] = PROCESSED;
+            // Do after processing here
+        }
+
+        return std::pair(process_order, vertex_parents); 
     }
 };
 
@@ -35,6 +81,8 @@ void print_graph(std::vector<std::list<int>> * adj_list) {
 int main() {
     std::cout << "Welcome to my graph program!" << std::endl;
     std::cout << "Creates an undirected graph, has BFS so far..." << std::endl;
+
+    // Creating the graph
     Graph g(5);
     g.add_edge(0, 1);
     g.add_edge(0, 4);
@@ -42,7 +90,17 @@ int main() {
     g.add_edge(1, 3);
     g.add_edge(1, 4);
 
-    // Get adj list 
-    print_graph(g.get_adj_list());
+    // Doing BFS, storing results
+    GraphSearch gs;
+    std::pair<std::vector<int>, std::vector<int>> bfs_result = gs.BFS(&g, 0);
+    std::vector<int> order = bfs_result.first;
+    std::vector<int> parents = bfs_result.second;
+
+    // Printing results
+    std::cout << "BFS Order:    ";
+    print_vector(order);
+    std::cout << "BFS Parents: ";
+    print_vector(parents);
+
     return 0;
 }
